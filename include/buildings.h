@@ -23,122 +23,108 @@ enum class BuildingCondition : int{
     fresh = 3,
     unknown = -1
 };
-
+// Parent class of buildings
 class buildings{
-protected:
+private:
     bool IsBuilt;
     BuildingType Type;
     BuildingCondition Condition;
     int NumberFloors;
+
+protected:
     buildings();
 
 public:
     bool getBuildState() const {return IsBuilt;};
     BuildingType getBuildType() const {return Type;};
     BuildingCondition getBuildCondition() const {return Condition;};
-    virtual int getNumFloors() const = 0;
+    virtual int getNumFloors() const {return NumberFloors;}
     virtual int getNumObjects() const = 0;
     virtual string getBuilding() = 0;
+    void repair(BuildingCondition cond);
+
+    void setState(bool is_built){IsBuilt = is_built;}
+    void setBuildigType(BuildingType type){Type = type;}
     void setBuildingCondition(BuildingCondition condition){Condition = condition;}
     void setNumFloors(int number) {NumberFloors = number;};
-    void repair(BuildingCondition cond);
 
 };
 typedef buildings* BuildPtr;
 
+// building's hereditary class Houses
 class Houses : public buildings{
-protected:
-    int NumberResidents;
+private:
+    int NumberResidents = 0;
 public:
     Houses(): buildings(){
-        Type = BuildingType::house;
+        setBuildigType(BuildingType::house);
         if(getBuildState()){
-            Condition = static_cast<BuildingCondition>(rand()%3);
-            NumberFloors = rand()%5+1;
+            setBuildingCondition(static_cast<BuildingCondition>(rand()%3));
+            setNumFloors(rand()%5+1);
             NumberResidents = rand()%50+1;
         }
-        else{
-            Condition = BuildingCondition::unknown;
-            NumberFloors = 0;
-            NumberResidents = 0;
-        }
     };
-    virtual int getNumFloors() const {return NumberFloors;};
     virtual int getNumObjects() const {return NumberResidents;};
     virtual string getBuilding();
+
+    void setNumResidents(int number) {NumberResidents = number;};
 };
 
+// building's hereditary class Shops
 class Shops : public buildings{
 protected:
-    int NumberShops;
+    int NumberShops = 0;
 public:
     Shops(): buildings(){
-        Type = BuildingType::shop_center;
+        setBuildigType(BuildingType::shop_center);
         if(getBuildState()){
-            Condition = static_cast<BuildingCondition>(rand()%3);
-            NumberFloors = rand()%5+1;
+            setBuildingCondition(static_cast<BuildingCondition>(rand()%3));
+            setNumFloors(rand()%5+1);
             NumberShops = rand()%100+1;
         }
-        else{
-            Condition = BuildingCondition::unknown;
-            NumberFloors = 0;
-            NumberShops = 0;
-
-        }
     };
-    virtual int getNumFloors() const {return NumberFloors;};
     virtual int getNumObjects() const {return NumberShops;};
     virtual string getBuilding();
 };
 
+// building's hereditary class Hospitals
 class Hospitals : public buildings{
 protected:
-    int NumberPatient;
+    int NumberPatient = 0;
 public:
     Hospitals(): buildings(){
-        Type = BuildingType::hospital;
+        setBuildigType(BuildingType::hospital);
         if(getBuildState()){
-            Condition = static_cast<BuildingCondition>(rand()%3);
-            NumberFloors = rand()%3+1;
+            setBuildingCondition(static_cast<BuildingCondition>(rand()%3));
+            setNumFloors(rand()%3+1);
             NumberPatient = rand()%50+1;
         }
-        else{
-            Condition = BuildingCondition::unknown;
-            NumberFloors = 0;
-            NumberPatient = 0;
-        }
     };
-    virtual int getNumFloors() const {return NumberFloors;};
     virtual int getNumObjects() const {return NumberPatient;};
     virtual string getBuilding();
 };
 
+// building's hereditary class Parkings
 class Parkings : public buildings{
 protected:
-    int NumberCars;
-    int NumberParkingSpaces;
+    int NumberCars = 0;
+    int NumberParkingSpaces = 0;
 public:
     Parkings(): buildings(){
-        Type = BuildingType::parking;
+        setBuildigType(BuildingType::parking);
         if(getBuildState()){
-            Condition = static_cast<BuildingCondition>(rand()%3);
-            NumberFloors = rand()%4+1;
+            setBuildingCondition(static_cast<BuildingCondition>(rand()%3));
+            setNumFloors(rand()%4+1);
             NumberParkingSpaces = rand()%50+1;
             NumberCars = (rand()%50)%NumberParkingSpaces;
         }
-        else{
-            Condition = BuildingCondition::unknown;
-            NumberFloors = 0;
-            NumberParkingSpaces = 0;
-            NumberCars = 0;
-        }
     };
-    virtual int getNumFloors() const {return NumberFloors;};
     virtual int getNumObjects() const {return NumberCars;};
     int getNumParkSpaces() const {return NumberParkingSpaces;};
     virtual string getBuilding();
 };
 
+// Parent class of containers
 class BuildingContainer{
 protected:
     BuildPtr *BuildingCont;
@@ -150,6 +136,7 @@ public:
     virtual Iterator<BuildPtr> *getIter() = 0;
 };
 
+// Massive's iterator
 class BuildMassiveIter : public Iterator<BuildPtr>{
 private:
     const BuildPtr *BuildMassive;
@@ -168,6 +155,7 @@ public:
     BuildPtr getCurrent() const {return BuildMassive[Pos];}
 };
 
+// container's hereditary class Massive
 class BuildingMassive : public BuildingContainer{
 private:
     BuildPtr *BuildMassive;
@@ -187,6 +175,7 @@ public:
     }
 };
 
+// List's iterator
 class BuildListIter : public Iterator<BuildPtr>{
 private:
     const list<BuildPtr> *BuildList;
@@ -203,6 +192,7 @@ public:
     BuildPtr getCurrent() const {return *it;}
 };
 
+// container's hereditary class List
 class BuildingList : public BuildingContainer{
 private:
     list<BuildPtr> BuildList;
@@ -216,6 +206,7 @@ public:
     }
 };
 
+// Vector's iterator
 class BuildVectorIter : public Iterator<BuildPtr>{
 private:
     const vector<BuildPtr>* BuildVector;
@@ -233,6 +224,7 @@ public:
     BuildPtr getCurrent() const {return BuildVector->at(Pos);}
 };
 
+// container's hereditary class Vector
 class BuildingVector : public BuildingContainer{
 private:
     vector<BuildPtr> BuildVector;
@@ -248,4 +240,101 @@ public:
     }
 };
 
+// decorator filters object by their state
+class is_state_decor : public IteratorDecorator<BuildPtr>{
+private:
+    bool TargetState;
+
+public:
+
+    is_state_decor(Iterator<BuildPtr>* it, bool state):IteratorDecorator(it) {TargetState = state;}
+
+    void first(){
+        It->first();
+        while(!It->isDone()
+            && It->getCurrent()->getBuildState()!=TargetState)
+            {It->next();}
+    }
+
+    void next(){
+        do{It->next();}
+        while(!It->isDone()
+              && It->getCurrent()->getBuildState()!=TargetState);
+    }
+
+};
+
+// decorator filters object by their type
+class is_type_decor : public IteratorDecorator<BuildPtr>{
+private:
+    BuildingType TargetType;
+
+public:
+
+    is_type_decor(Iterator<BuildPtr>* it, BuildingType type):IteratorDecorator(it) {TargetType = type;}
+
+    void first(){
+        It->first();
+        while(!It->isDone()
+            && It->getCurrent()->getBuildType()!=TargetType)
+            {It->next();}
+    }
+
+    void next(){
+        do{It->next();}
+        while(!It->isDone()
+              && It->getCurrent()->getBuildType()!=TargetType);
+    }
+
+};
+
+// decorator filters object by their condition
+class is_condition_decor : public IteratorDecorator<BuildPtr>{
+private:
+    BuildingCondition TargetCondition;
+
+public:
+    is_condition_decor(Iterator<BuildPtr> *it, BuildingCondition condition):IteratorDecorator(it){TargetCondition = condition;}
+
+    void first(){
+        It->first();
+        while (!It->isDone()
+               && It->getCurrent()->getBuildCondition()!=TargetCondition)
+            {It->next();}
+    }
+
+    void next(){
+        do{It->next();}
+        while(!It->isDone()
+               && It->getCurrent()->getBuildCondition()!=TargetCondition);
+    }
+};
+
+// decorator filters object by their type and condition
+class is_type_and_condition_decor : public IteratorDecorator<BuildPtr>{
+private:
+    BuildingType TargetType;
+    BuildingCondition TargetCondition;
+
+public:
+    is_type_and_condition_decor(Iterator<BuildPtr> *it, BuildingType type, BuildingCondition condition):IteratorDecorator(it){
+        TargetCondition = condition;
+        TargetType = type;
+    }
+
+    void first(){
+        It->first();
+        while (!It->isDone()
+               && !(It->getCurrent()->getBuildCondition()==TargetCondition
+                    &&It->getCurrent()->getBuildType()==TargetType))
+            {It->next();}
+    }
+
+    void next(){
+        do{It->next();}
+        while(!It->isDone()
+               && !(It->getCurrent()->getBuildCondition()==TargetCondition
+                    &&It->getCurrent()->getBuildType()==TargetType));
+    }
+};
 #endif // BUILDINGS_H

@@ -35,6 +35,9 @@
 			<Add option="-fexceptions" />
 		</Compiler>
 		<Unit filename="include/buildings.h" />
+		<Unit filename="include/pattern_iterators.h">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
 		<Unit filename="main.cpp" />
 		<Unit filename="src/buildings.cpp" />
 		<Extensions>

@@ -1,9 +1,6 @@
 #ifndef PTRN_ITERATORS_H
 #define PTRN_ITERATORS_H
 
-#ifndef PATTERNS_H
-#define PATTERNS_H
-
 template<class Type>
 class Iterator{
 protected:
@@ -27,12 +24,10 @@ public:
         It = it;
     }
     virtual ~IteratorDecorator(){delete It;}
-    virtual void first() {It ->First();};
-    virtual void next() {It ->Next();};
-    virtual bool isDone() const {return It ->IsDone();};
-    virtual Type getCurrent() const {return It ->GetCurrent();};
+    virtual void first() {It->first();};
+    virtual void next() {It->next();};
+    virtual bool isDone() const {return It->isDone();};
+    virtual Type getCurrent() const {return It->getCurrent();};
 };
-#endif // PATTERNS_H_INCLUDED
-
 
 #endif // PTRN_ITERATORS_H

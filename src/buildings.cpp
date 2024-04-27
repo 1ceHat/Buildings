@@ -9,6 +9,7 @@ buildings::buildings()
     IsBuilt = bool(rand()%2);
     Type = BuildingType::unknown;
     Condition = BuildingCondition::unknown;
+    NumberFloors = 0;
 }
 
 void buildings::repair(BuildingCondition cond){
