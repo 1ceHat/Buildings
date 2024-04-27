@@ -4,12 +4,20 @@
 
 using namespace std;
 
-buildings::buildings()
-{
+buildings::buildings(){
     IsBuilt = bool(rand()%2);
     Type = BuildingType::unknown;
     Condition = BuildingCondition::unknown;
     NumberFloors = 0;
+};
+
+buildings* buildings::create(BuildingType type){
+    switch(type){
+        case BuildingType::house: return new Houses();
+        case BuildingType::shop_center: return new Shops();
+        case BuildingType::hospital: return new Hospitals();
+        case BuildingType::parking: return new Parkings();
+    }
 }
 
 void buildings::repair(BuildingCondition cond){

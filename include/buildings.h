@@ -33,21 +33,28 @@ private:
 
 protected:
     buildings();
+    void setBuildigType(BuildingType type){Type = type;}
 
 public:
+    // getting information
     bool getBuildState() const {return IsBuilt;};
     BuildingType getBuildType() const {return Type;};
     BuildingCondition getBuildCondition() const {return Condition;};
     virtual int getNumFloors() const {return NumberFloors;}
-    virtual int getNumObjects() const = 0;
+    virtual int getNumObjects() const {};
     virtual string getBuilding() = 0;
+
+    // upgrade building's condition by 1
     void repair(BuildingCondition cond);
 
+    // setting information
     void setState(bool is_built){IsBuilt = is_built;}
-    void setBuildigType(BuildingType type){Type = type;}
     void setBuildingCondition(BuildingCondition condition){Condition = condition;}
     void setNumFloors(int number) {NumberFloors = number;};
+    virtual void setNumObjects(int number) = 0;
 
+    // fabric
+    static buildings* create(BuildingType type);
 };
 typedef buildings* BuildPtr;
 
@@ -64,10 +71,12 @@ public:
             NumberResidents = rand()%50+1;
         }
     };
-    virtual int getNumObjects() const {return NumberResidents;};
-    virtual string getBuilding();
+    //getting information
+    virtual int getNumObjects() const override {return NumberResidents;};
+    virtual string getBuilding() override;
 
-    void setNumResidents(int number) {NumberResidents = number;};
+    //setting information
+    void setNumObjects(int number) {NumberResidents = number;};
 };
 
 // building's hereditary class Shops
@@ -83,8 +92,12 @@ public:
             NumberShops = rand()%100+1;
         }
     };
-    virtual int getNumObjects() const {return NumberShops;};
-    virtual string getBuilding();
+    //getting information
+    virtual int getNumObjects() const override {return NumberShops;};
+    virtual string getBuilding() override;
+
+    //setting information
+    void setNumObjects(int number) {NumberShops = number;};
 };
 
 // building's hereditary class Hospitals
@@ -100,8 +113,12 @@ public:
             NumberPatient = rand()%50+1;
         }
     };
-    virtual int getNumObjects() const {return NumberPatient;};
-    virtual string getBuilding();
+    //getting information
+    virtual int getNumObjects() const override {return NumberPatient;};
+    virtual string getBuilding() override;
+
+    //setting information
+    virtual void setNumObjects(int number) {NumberPatient = number;}
 };
 
 // building's hereditary class Parkings
@@ -119,9 +136,14 @@ public:
             NumberCars = (rand()%50)%NumberParkingSpaces;
         }
     };
-    virtual int getNumObjects() const {return NumberCars;};
+    //getting information
+    virtual int getNumObjects() const override {return NumberCars;};
     int getNumParkSpaces() const {return NumberParkingSpaces;};
     virtual string getBuilding();
+
+    //setting information
+    virtual void setNumObjects(int number) {NumberCars = number;}
+    void setNumParkSpaces(int number) {NumberParkingSpaces = number;}
 };
 
 // Parent class of containers
@@ -132,8 +154,8 @@ protected:
 public:
     virtual BuildPtr getLast() const = 0;
     virtual int length() const = 0;
-    virtual void add(BuildPtr new_build) = 0;
     virtual Iterator<BuildPtr> *getIter() = 0;
+    virtual void add(BuildPtr new_build) = 0;
 };
 
 // Massive's iterator
@@ -164,6 +186,7 @@ private:
 public:
     BuildingMassive(int max_size);
     virtual ~BuildingMassive();
+
     BuildPtr getLast() const {return BuildMassive[-1];}
     BuildPtr getByIndex(int index) const {return BuildMassive[index];}
     int length() const {return MaxSize;}
